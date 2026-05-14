@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JAEMIN'S Virtual Restaurant</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { margin: 0; background: #f3f4f6; font-family: Arial, sans-serif; }
+    .container { max-width: 1200px; margin: auto; padding: 30px; padding-bottom: 140px; }
+    .title { text-align: center; margin-bottom: 60px; }
+    .title h1 { font-size: 50px; margin-bottom: 10px; }
+    .menu-section { margin-bottom: 70px; }
+    .menu-title { font-size: 30px; margin-bottom: 25px; border-left: 5px solid #2563eb; padding-left: 12px; font-weight: bold; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+    .card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.08); transition: 0.3s; }
+    .card:hover { transform: translateY(-5px); }
+    .card img { width: 100%; height: 220px; object-fit: cover; }
+    .card-body { padding: 18px; }
+    .food-name { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+    .price { color: #2563eb; font-weight: bold; margin-bottom: 20px; font-size: 18px; }
+    .order-btn { width: 100%; border: none; background: #0f172a; color: white; padding: 14px; border-radius: 12px; cursor: pointer; font-size: 16px; font-weight: bold; }
+    .order-btn:hover { background: #1e293b; }
+    .footer { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #ddd; padding: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.08); z-index: 10; }
+    .checkout-btn { background: #2563eb; color: white; border: none; padding: 15px 35px; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer; }
+    .checkout-btn:hover { background: #1d4ed8; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center mb-12 bg-white p-6 rounded-2xl shadow-sm">
+    <div class="md:col-span-1 text-center md:text-left">
+      <h1 class="text-4xl font-black text-gray-800">JAEMIN'S Food</h1>
+      <p class="text-gray-500 mt-1">가상 주문 대시보드 시스템</p>
+    </div>
+    
+    <div class="bg-slate-900 text-white p-4 rounded-xl text-center">
+      <span class="text-xs font-bold text-yellow-400 uppercase tracking-wider">🛎️ 주문 번호</span>
+      <div id="display-order-no" class="text-2xl font-black text-white mt-1">대기 중</div>
+    </div>
+
+    <div class="bg-slate-900 text-white p-4 rounded-xl text-center border-l-4 border-orange-500">
+      <span class="text-xs font-bold text-orange-400 uppercase tracking-wider">⏳ 예상 대기 시간</span>
+      <div id="display-waiting-time" class="text-2xl font-black text-white mt-1">0 분</div>
+    </div>
+  </div>
+
+  <div class="menu-section">
+    <div class="menu-title">Korean Menu</div>
+    <div class="grid">
+      <div class="card">
+        <img src="https://images.unsplash.com/photo-1553163147-622ab57be1c7?q=80&w=1200&auto=format&fit=crop">
+        <div class="card-body">
+          <div class="food-name">비빔밥</div>
+          <div class="price">₩ 10,000</div>
+          <button class="order-btn" onclick="addFood('비빔밥', 10000)">주문하기</button>
+        </div>
+      </div>
+      <div class="card">
+        <img src="https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1200&auto=format&fit=crop">
+        <div class="card-body">
+          <div class="food-name">냉면</div>
+          <div class="price">₩ 9,000</div>
+          <button class="order-btn" onclick="addFood('냉면', 9000)">주문하기</button>
+        </div>
+      </div>
+      <div class="card">
+        <img src="https://images.unsplash.com/photo-1603360946369-dc9bb6258143?q=80&w=1200&auto=format&fit=crop">
+        <div class="card-body">
+          <div class="food-name">순대국밥</div>
+          <div class="price">₩ 8,000</div>
+          <button class="order-btn" onclick="addFood('순대국밥', 8000)">주문하기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="menu-section">
+    <div class="menu-title">Chinese Menu</div>
+    <div class="grid">
+      <div class="card">
+        <img src="https://images.unsplash.com/photo-1585032226651-759b368d7246?q=80&w=1200&auto=format&fit=crop">
+        <div class="card-body">
+          <div class="food-name">짜장면</div>
+          <div class="price">₩ 7,000</div>
+          <button class="order-btn" onclick="addFood('짜장면', 7000)">주문하기</button>
+        </div>
+      </div>
+      <div class="card">
+        <img src="https://images.unsplash.com/photo-1617093727343-374698b1b08d?q=80&w=1200&auto=format&fit=crop">
+        <div class="card-body">
+          <div class="food-name">짬뽕</div>
+          <div class="price">₩ 8,000</div>
+          <button class="order-btn" onclick="addFood('짬뽕', 8000)">주문하기</button>
+        </div>
+      </div>
+      <div class="card">
+        <img src="https://images.unsplash.com/photo-1604909052743-94e838986d24?q=80&w=1200&auto=format&fit=crop">
+        <div class="card-body">
+          <div class="food-name">탕수육</div>
+          <div class="price">₩ 15,000</div>
+          <button class="order-btn" onclick="addFood('탕수육', 15000)">주문하기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="menu-section">
+    <div class="menu-title">Western Menu</div>
+    <div class="grid">
+      <div class="card">
+        <img src="https://images.unsplash.com/photo-1562967916-eb82221dfb92?q=80&w=1200&auto=format&fit=crop">
+        <div class="card-body">
+          <div class="food-name">치킨</div>
+          <div class="price">₩ 20,000</div>
+          <button class="order-btn" onclick="addFood('치킨', 20000)">주문하기</button>
+        </div>
+      </div>
+      <div class="card">
+        <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=1200&auto=format&fit=crop">
+        <div class="card-body">
+          <div class="food-name">피자</div>
+          <div class="price">₩ 18,000</div>
+          <button class="order-btn" onclick="addFood('피자', 18000)">주문하기</button>
+        </div>
+      </div>
+      <div class="card">
+        <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1200&auto=format&fit=crop">
+        <div class="card-body">
+          <div class="food-name">햄버거</div>
+          <div class="price">₩ 7,000</div>
+          <button class="order-btn" onclick="addFood('햄버거', 7000)">주문하기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="menu-section">
+    <div class="menu-title">Japanese Menu</div>
+    <div class="grid">
+      <div class="card">
+        <img src="https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=1200&auto=format&fit=crop">
+        <div class="card-body">
+          <div class="food-name">초밥</div>
+          <div class="price">₩ 15,000</div>
+          <button class="order-btn" onclick="addFood('초밥', 15000)">주문하기</button>
+        </div>
+      </div>
+      <div class="card">
+        <img src="https://images.unsplash.com/photo-1618841557871-b4664fbf0cb3?q=80&w=1200&auto=format&fit=crop">
+        <div class="card-body">
+          <div class="food-name">우동</div>
+          <div class="price">₩ 8,000</div>
+          <button class="order-btn" onclick="addFood('우동', 8000)">주문하기</button>
+        </div>
+      </div>
+      <div class="card">
+        <img src="https://images.unsplash.com/photo-1607330289024-1535c6b4e1c1?q=80&w=1200&auto=format&fit=crop">
+        <div class="card-body">
+          <div class="food-name">규동</div>
+          <div class="price">₩ 9,000</div>
+          <button class="order-btn" onclick="addFood('규동', 9000)">주문하기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="flex gap-8 items-center">
+    <div>
+      <div>총 주문 금액 (<span id="cart-count">0</span>개 메뉴 선택됨)</div>
+      <h2 id="total" class="text-2xl font-bold text-blue-600">₩ 0</h2>
+    </div>
+    <button onclick="resetAll()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-xl text-sm transition">
+      🔄 다시 주문하기 (초기화)
+    </button>
+  </div>
+  <button class="checkout-btn" onclick="openCheckoutModal()">결제하기</button>
+</div>
+
+<div id="checkout-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  <div class="bg-white p-8 rounded-2xl w-full max-w-md shadow-2xl mx-4">
+    <h3 class="text-2xl font-bold mb-2 text-gray-800">최종 결제 및 주문</h3>
+    <p class="text-sm text-gray-500 mb-6">주문자 성함을 입력하시면 결제 처리가 시작됩니다.</p>
+    
+    <div class="mb-4">
+      <label class="block text-sm font-semibold text-gray-700 mb-1">주문자 성함</label>
+      <input type="text" id="customer-name" placeholder="홍길동" class="w-full border border-gray-300 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+    </div>
+    
+    <div class="bg-gray-50 p-4 rounded-xl mb-6 text-sm text-gray-600 space-y-2">
+      <div class="flex justify-between"><span>최종 결제 금액:</span><span id="modal-total" class="font-bold text-blue-600">₩ 0</span></div>
+      <div class="flex justify-between text-xs text-orange-600"><span>예상 조리 시간:</span><span id="modal-time" class="font-bold">0분</span></div>
+    </div>
+    
+    <div class="flex gap-3">
+      <button onclick="closeCheckoutModal()" class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-300 transition">취소</button>
+      <button id="submit-btn" onclick="submitOrder()" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition">결제하기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let total = 0;
+  let cartItems = {};
+  let totalMenuCount = 0;
+
+  // 음식을 장바구니에 담을 때 실행
+  function addFood(name, price) {
+    total += price;
+    cartItems[name] = (cartItems[name] || 0) + 1;
+    totalMenuCount += 1; // 총 메뉴 개수 누적
+    updateUI();
+  }
+
+  function updateUI() {
+    document.getElementById("total").innerText = "₩ " + total.toLocaleString();
+    document.getElementById("cart-count").innerText = totalMenuCount;
+  }
+
+  // 결제 모달 팝업 열기
+  function openCheckoutModal() {
+    if(total === 0) {
+      alert("주문할 메뉴를 먼저 선택해 주세요.");
+      return;
+    }
+    document.getElementById("modal-total").innerText = "₩ " + total.toLocaleString();
+    
+    // 메뉴 1개당 10분씩 계산해서 모달창 안에 미리 보여주기
+    const calculatedTime = totalMenuCount * 10;
+    document.getElementById("modal-time").innerText = calculatedTime + "분";
+    
+    document.getElementById("checkout-modal").classList.remove("hidden");
+  }
+
+  // 결제 모달 팝업 닫기
+  function closeCheckoutModal() {
+    document.getElementById("checkout-modal").classList.add("hidden");
+    document.getElementById("customer-name").value = "";
+  }
+
+  // 성함 입력 후 최종 결제하기 버튼을 눌렀을 때 실행되는 함수
+  function submitOrder() {
+    const customerName = document.getElementById("customer-name").value.trim();
+    if(!customerName) {
+      alert("성함을 입력해 주세요.");
+      return;
+    }
+
+    // 메뉴 1개당 10분 계산
+    const finalWaitingTime = totalMenuCount * 10;
+    // 임의의 4자리 주문번호 생성
+    const randomOrderNo = Math.floor(1000 + Math.random() * 9000);
+
+    // 1. 알림 메시지 띄우기
+    alert("결제되었습니다.");
+
+    // 2. 상단 전광판 표지판에 결과 반영 (메뉴당 10분 계산)
+    document.getElementById("display-order-no").innerText = `No. ${randomOrderNo}`;
+    document.getElementById("display-waiting-time").innerText = `${finalWaitingTime} 분`;
+
+    // 3. 결제 완료 후 장바구니(선택된 금액/개수) 비우기
+    total = 0;
+    cartItems = {};
+    totalMenuCount = 0;
+    updateUI();
+
+    // 4. 모달창 자동으로 닫기
+    closeCheckoutModal();
+  }
+
+  // 다시 주문하기 버튼 클릭 시 -> 전광판 대기시간 및 장바구니 데이터 모두 초기화
+  function resetAll() {
+    total = 0;
+    cartItems = {};
+    totalMenuCount = 0;
+    
+    // 장바구니 영역 UI 리셋
+    updateUI();
+    
+    // 상단 전광판 표지판 영역 완전히 초기화
+    document.getElementById("display-order-no").innerText = "대기 중";
+    document.getElementById("display-waiting-time").innerText = "0 분";
+    
+    alert("전광판 대기 시간과 장바구니가 모두 초기화되었습니다.");
+  }
+</script>
+</body>
+</html>

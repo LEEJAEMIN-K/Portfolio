@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>👨‍🍳 주방 주문 관리 시스템 (KDS)</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
+        body { background: #1e293b; color: #fff; padding: 20px; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #334155; }
+        
+        .kds-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .column { background: #0f172a; border-radius: 10px; padding: 15px; min-height: 80vh; }
+        .column-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid; text-align: center; }
+        
+        .col-pay .column-title { border-color: #ef4444; color: #f87171; }
+        .col-cook .column-title { border-color: #f59e0b; color: #fbbf24; }
+        .col-done .column-title { border-color: #10b981; color: #34d399; }
+
+        .order-card { background: #1e293b; border-radius: 8px; padding: 15px; margin-bottom: 15px; border-left: 5px solid; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .card-pay { border-color: #ef4444; }
+        .card-cook { border-color: #f59e0b; }
+        .card-done { border-color: #10b981; opacity: 0.85; }
+
+        .card-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px; font-size: 1.1rem; }
+        .items-list { list-style: none; margin-bottom: 12px; border-top: 1px dashed #475569; border-bottom: 1px dashed #475569; padding: 8px 0; }
+        .items-list li { display: flex; justify-content: space-between; font-size: 1rem; margin-bottom: 4px; }
+        
+        .btn-group { display: flex; gap: 8px; }
+        .btn { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; }
+        .btn-cook { background: #f59e0b; }
+        .btn-done { background: #10b981; }
+        .btn-remove { background: #64748b; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>👨‍🍳 주방 주문 관리 (KDS)</h1>
+        <div>상태: <span id="status-indicator" style="color: #ef4444;">○ 연결 중...</span></div>
+    </header>
+
+    <div class="kds-board">
+        <!-- 1. 결제 완료 (대기 중) -->
+        <div class="column col-pay">
+            <div class="column-title">💳 결제 완료 (조리 대기)</div>
+            <div id="list-pay"></div>
+        </div>
+
+        <!-- 2. 조리 중 -->
+        <div class="column col-cook">
+            <div class="column-title">🔥 조리 중</div>
+            <div id="list-cook"></div>
+        </div>
+
+        <!-- 3. 조리 완료 -->
+        <div class="column col-done">
+            <div class="column-title">✅ 조리 완료 (픽업 대기)</div>
+            <div id="list-done"></div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io('http://localhost:4000');
+        const statusIndicator = document.getElementById('status-indicator');
+
+        socket.on('connect', () => {
+            statusIndicator.textContent = '● 연결됨';
+            statusIndicator.style.color = '#34d399';
+        });
+
+        socket.on('disconnect', () => {
+            statusIndicator.textContent = '○ 연결 끊김';
+            statusIndicator.style.color = '#ef4444';
+        });
+
+        socket.on('init-orders', renderOrders);
+        socket.on('order-updated', renderOrders);
+
+        function renderOrders(orders) {
+            const listPay = document.getElementById('list-pay');
+            const listCook = document.getElementById('list-cook');
+            const listDone = document.getElementById('list-done');
+
+            listPay.innerHTML = '';
+            listCook.innerHTML = '';
+            listDone.innerHTML = '';
+
+            orders.forEach(order => {
+                const card = document.createElement('div');
+                const itemsHtml = order.items.map(i => `<li><span>${i.name}</span> <strong>x ${i.quantity}</strong></li>`).join('');
+
+                if (order.status === 'PAYMENT_COMPLETE') {
+                    card.className = 'order-card card-pay';
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <span>📍 테이블 ${order.tableNum}번 (#${order.id})</span>
+                            <span style="font-size:0.85rem; color:#94a3b8;">${order.createdAt}</span>
+                        </div>
+                        <ul class="items-list">${itemsHtml}</ul>
+                        <div class="btn-group">
+                            <button class="btn btn-cook" onclick="updateStatus('${order.id}', 'COOKING')">🔥 조리 시작 (${order.totalTime}분)</button>
+                        </div>
+                    `;
+                    listPay.appendChild(card);
+                } 
+                else if (order.status === 'COOKING') {
+                    card.className = 'order-card card-cook';
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <span>📍 테이블 ${order.tableNum}번 (#${order.id})</span>
+                            <span style="font-size:0.85rem; color:#fbbf24;">조리 중</span>
+                        </div>
+                        <ul class="items-list">${itemsHtml}</ul>
+                        <div class="btn-group">
+                            <button class="btn btn-done" onclick="updateStatus('${order.id}', 'DONE')">✅ 조리 완료</button>
+                        </div>
+                    `;
+                    listCook.appendChild(card);
+                } 
+                else if (order.status === 'DONE') {
+                    card.className = 'order-card card-done';
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <span>📍 테이블 ${order.tableNum}번 (#${order.id})</span>
+                            <span style="color:#34d399;">완료됨</span>
+                        </div>
+                        <ul class="items-list">${itemsHtml}</ul>
+                        <div class="btn-group">
+                            <button class="btn btn-remove" onclick="removeOrder('${order.id}')">🗑️ 화면에서 빼기</button>
+                        </div>
+                    `;
+                    listDone.appendChild(card);
+                }
+            });
+        }
+
+        function updateStatus(orderId, status) {
+            socket.emit('update-status', { orderId, status });
+        }
+
+        function removeOrder(orderId) {
+            socket.emit('remove-order', orderId);
+        }
+    </script>
+</body>
+</html>
